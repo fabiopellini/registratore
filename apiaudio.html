@@ -1,0 +1,51 @@
+<!-- The following
+HTML and JavaScript code is used to record audio and post it to www.fapelsrl.it/send.php:
+-->
+<html>
+   <head>
+       <title>Recording Audio</title>
+   </head>
+   <body>
+       <div id="audio-container">
+           <audio id="audio-recorder" controls></audio>
+       </div>
+       <div>
+           <button id="start-recording">Start Recording</button>
+           <button id="stop-recording" disabled="disabled">Stop Recording</button>
+       </div>
+       <script>
+           // Media Stream Recording API
+           let mediaRecorder;
+           let chunks = [];
+
+           const startRecording = document.getElementById('start-recording');
+           startRecording.addEventListener('click', function(){
+               // Ask for permission
+               navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream){
+                   let mimeType = 'audio/webm';
+                   if(navigator.userAgent.match(/Firefox/)){
+                       mimeType = 'audio/ogg';
+                   }
+                   // Start Recording
+                   mediaRecorder = new MediaRecorder(stream, {mimeType});
+                   mediaRecorder.start();
+                   // Streaming into audio-recorder element
+                   let audioRecorder = document.getElementById('audio-recorder');
+                   audioRecorder.srcObject = stream;
+                   // Change UI
+                   startRecording.setAttribute('disabled', true);
+                   stopRecording.removeAttribute('disabled');
+                   // Listen for data available event
+                   mediaRecorder.addEventListener('dataavailable', function(e){
+                       chunks.push(e.data);
+                   });
+               });
+           });
+
+           const stopRecording = document.getElementById('stop-recording');
+           stopRecording.addEventListener('click', function(){
+               // Stop Recording
+               mediaRecorder.stop();
+               // Change UI
+               stopRecording.setAttribute('disabled', true);
+               startRecording.removeAttribute('disabled');

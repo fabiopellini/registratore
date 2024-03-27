@@ -1,0 +1,43 @@
+<html>
+<head>
+    <title>Audio Recording</title>
+    <script>
+        const audioContext = new AudioContext();
+        let recordAudio;
+
+        function startRecording(){
+            navigator.mediaDevices.getUserMedia({audio: true})
+            .then(stream => {
+                recordAudio = new MediaRecorder(stream);
+                recordAudio.start();
+            });
+        }
+
+        function stopRecording(){
+            recordAudio.stop();
+            const audio = document.querySelector('audio');
+            audio.src = URL.createObjectURL(audio);
+            audio.play();
+            console.log(audio.src);
+        }
+
+        function postAudio(){
+            let formData = new FormData();
+            formData.append('audio', recordAudio.getBlob(), 'audio.wav');
+            fetch('www.fapelsrl.it/send.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                console.log(response);
+            })
+        }
+    </script>
+</head>
+<body>
+    <button onclick="startRecording()">Start Recording</button>
+    <button onclick="stopRecording()">Stop Recording</button>
+    <button onclick="postAudio()">Post Audio</button>
+    <audio controls></audio>
+</body>
+</html>
